@@ -1,6 +1,9 @@
 package processor
 
-import "crypto/rand"
+import (
+	"crypto/cipher"
+	"crypto/rand"
+)
 
 func Encrypt(data string) error {
 	passphrase, err := GetPassphrase()
@@ -9,6 +12,16 @@ func Encrypt(data string) error {
 	}
 
 	salt, err := makeSalt()
+	if err != nil {
+		return err
+	}
+
+	key, err := DeriveKeyFrom(passphrase, salt)
+	if err != nil {
+		return err
+	}
+
+	crypter, err := MakeCrypterFrom(key)
 	if err != nil {
 		return err
 	}
@@ -21,4 +34,12 @@ func makeSalt() ([]byte, error) {
 		return nil, err
 	}
 	return salt, nil
+}
+
+func makeNonceFor(crypter cipher.AEAD) ([]byte, error) {
+	nonce := make([]byte, crypter.NonceSize())
+	if _, err := rand.Read(nonce); err != nil {
+		return nil, err
+	}
+	return nonce, nil
 }

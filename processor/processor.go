@@ -1,12 +1,22 @@
 package processor
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
 	"fmt"
 	"os"
 
 	"golang.org/x/crypto/argon2"
 	"golang.org/x/term"
 )
+
+func MakeCrypterFrom(key []byte) (cipher.AEAD, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, err
+	}
+	return cipher.NewGCM(block)
+}
 
 func DeriveKeyFrom(passphrase, salt []byte) ([]byte, error) {
 	key := argon2.IDKey(passphrase, salt, 1, 64*1024, 2, 32)
