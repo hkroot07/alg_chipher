@@ -1,1 +1,1 @@
-use ARGON-2
+use ARGON-2,SOLT
