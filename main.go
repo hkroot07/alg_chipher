@@ -1,6 +1,7 @@
 package main
 
 import (
+	"alg_chipher/utils"
 	"errors"
 	"flag"
 )
@@ -18,7 +19,9 @@ func main() {
 
 	if *decipherMode {
 
-	} else {
+	} else if *cipherMode {
 
+	} else {
+		utils.HaltOnErr(errors.New("unknow mode"))
 	}
 }
