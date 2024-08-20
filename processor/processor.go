@@ -10,6 +10,12 @@ import (
 	"golang.org/x/term"
 )
 
+type EncryptedPackage struct {
+	Nonce         []byte
+	Salt          []byte
+	EncryptedData []byte
+}
+
 func MakeCrypterFrom(key []byte) (cipher.AEAD, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {

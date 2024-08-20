@@ -1,8 +1,11 @@
 package processor
 
 import (
+	"bytes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/gob"
+	"os"
 )
 
 func Encrypt(data string) error {
@@ -25,6 +28,38 @@ func Encrypt(data string) error {
 	if err != nil {
 		return err
 	}
+
+	nonce, err := makeNonceFor(crypter)
+	if err != nil {
+		return err
+	}
+
+	encryptedData := crypter.Seal(nil, nonce, []byte(data), nil)
+
+	err = saveToFile(encryptedData, nonce, salt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func saveToFile(encryptedData, nonce, salt []byte) error {
+	encPackage := EncryptedPackage{
+		Nonce:         nonce,
+		Salt:          salt,
+		EncryptedData: encryptedData,
+	}
+
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	if err := encoder.Encode(encPackage); err != nil {
+		return err
+	}
+
+	if err := os.WriteFile("encrypted_data.bin", buffer.Bytes(), 0644); err != nil {
+		return err
+	}
+	return nil
 }
 
 // generate salt
